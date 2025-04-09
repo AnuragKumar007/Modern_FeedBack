@@ -9,18 +9,36 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // CORS configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',') 
-  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+const allowedOriginsRaw = process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173';
+// Properly process origins by trimming whitespace
+const allowedOrigins = allowedOriginsRaw
+  .split(',')
+  .map(origin => origin.trim());
+
+console.log('Allowed origins:', allowedOrigins);
 
 const corsOptions = {
   origin: function (origin, callback) {
+    // For debugging
+    console.log('Request from origin:', origin);
+    
     // Allow requests with no origin (like mobile apps, curl requests)
     if (!origin) return callback(null, true);
+    
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // More lenient check for subdomains/development environments
+      const originAllowed = allowedOrigins.some(allowed => 
+        origin.includes(allowed) || allowed.includes(origin)
+      );
+      
+      if (originAllowed) {
+        callback(null, true);
+      } else {
+        console.log('CORS blocked origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
     }
   },
   methods: ['GET', 'POST'],
