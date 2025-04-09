@@ -25,20 +25,33 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps, curl requests)
     if (!origin) return callback(null, true);
     
+    // Check for direct match
     if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    
+    // Check for Netlify deploy previews (they have format like: https://12345--yoursite.netlify.app)
+    if (origin && origin.includes('--modernfeedback.netlify.app')) {
+      console.log('Accepting Netlify deploy preview URL:', origin);
+      return callback(null, true);
+    }
+    
+    // More lenient check for subdomains/development environments
+    const originAllowed = allowedOrigins.some(allowed => {
+      // Handle wildcard domains
+      if (allowed.includes('*')) {
+        const allowedDomain = allowed.replace('*.', '');
+        return origin.includes(allowedDomain);
+      }
+      // Regular partial matching
+      return origin.includes(allowed) || allowed.includes(origin);
+    });
+    
+    if (originAllowed) {
       callback(null, true);
     } else {
-      // More lenient check for subdomains/development environments
-      const originAllowed = allowedOrigins.some(allowed => 
-        origin.includes(allowed) || allowed.includes(origin)
-      );
-      
-      if (originAllowed) {
-        callback(null, true);
-      } else {
-        console.log('CORS blocked origin:', origin);
-        callback(new Error('Not allowed by CORS'));
-      }
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   methods: ['GET', 'POST'],
