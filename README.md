@@ -91,14 +91,4 @@ The frontend development server will start at http://localhost:5173 by default.
   - `page`: Page number (default: 1)
   - `limit`: Results per page (default: 10)
 
-## Project Improvement Ideas
-
-- Add user authentication for admin access
-- Implement database storage (MongoDB, PostgreSQL, etc.)
-- Add ability to respond to feedback
-- Implement email notifications for new feedback
-- Create a dashboard with analytics
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE). 
+Created by Anurag Kumar
