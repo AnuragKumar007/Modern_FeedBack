@@ -1,4 +1,8 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+// Use environment variable with fallback to localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+// If VITE_API_URL doesn't include '/api', add it
+const apiUrl = API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`;
 
 /**
  * Submit a new feedback entry
@@ -7,7 +11,7 @@ const API_BASE_URL = 'http://localhost:5000/api';
  */
 export const submitFeedback = async (feedbackData) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/submit-feedback`, {
+    const response = await fetch(`${apiUrl}/submit-feedback`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +39,7 @@ export const submitFeedback = async (feedbackData) => {
  */
 export const getFeedbacks = async (page = 1, limit = 10) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/feedbacks?page=${page}&limit=${limit}`);
+    const response = await fetch(`${apiUrl}/feedbacks?page=${page}&limit=${limit}`);
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -55,7 +59,7 @@ export const getFeedbacks = async (page = 1, limit = 10) => {
  */
 export const checkApiHealth = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/health`);
+    const response = await fetch(`${apiUrl}/health`);
     return response.ok;
   } catch (error) {
     console.error('API health check failed:', error);
